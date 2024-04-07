@@ -1,0 +1,353 @@
+---
+title: "Assignment-5"
+author: "vivek rao kathheragandla"
+date: "2024-04-01"
+output: html_document
+---
+
+Importing required libraries 
+```{r}
+library("cluster")
+library("caret")
+library("factoextra")
+```
+
+#Import data set from local drive
+```{r}
+CEREALS<-read.csv("C:\\Users\\KATHHERAGANDLA VIVEK\\OneDrive\\Documents\\FML\\\\Assignment_5\\Cereals.csv")
+```
+
+#printing some records form the dataset
+```{r}
+head(CEREALS)
+```
+
+#printing the summary of the dataset
+```{r}
+summary(CEREALS)
+```
+***
+TASK-0 PRE-PROCESSING OF THE DATA
+
+```{r}
+#initializing a dataframe to store the pre-processsed data
+cereal_scaled_data <- CEREALS
+#scaling the cereals data and preparing for the clustering algorithm
+cereal_scaled_data[ , c(4:16)] <- scale(CEREALS[ , c(4:16)])
+#removing unwanted null values
+cleansed_data <- na.omit(cereal_scaled_data)
+#printing the pre-processed data
+head(cleansed_data)
+
+```
+Following pre-processing, the data is sorted in an alphabetical order and, once the null values have been eliminated, has 74 records. 
+
+***
+TASK 1 -
+
+Apply hierarchical clustering to the data using Euclidean distance to the normalized measurements. Use Agnes to compare the clustering from single linkage, complete linkage, average linkage, and Ward. Choose the best method. 
+```{r}
+#calculating the euclidean distance
+Euclidean_dist<- dist(cleansed_data[ , c(4:16)], method = "euclidean")
+#Euclidea_dist
+```
+
+APPLYING SINGLE LINKAGE 
+```{r}
+#using AGNES to compare and single linkage method for clustering
+clustering_H_single <- agnes(Euclidean_dist, method = "single")
+```
+Plotting the hierarchical clustering using single linkage method in a graph with Height on X-axis and cereal on Y-axis.
+```{r}
+plot(clustering_H_single, 
+main = "Ratings, AGNES comparision (Single Linkage)",
+ xlab = "Height",
+ ylab = "Cereal",
+ cex.axis = 0.5,
+ cex = 0.5,
+ hang = -1)
+## Warning in plot.window(xlim, ylim, log = log, ...): "hang" is not a graphical
+## parameter
+
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "hang"
+## is not a graphical parameter
+
+## Warning in axis(1, at = at.vals, labels = lab.vals, ...): "hang" is not a
+## graphical parameter
+
+```
+APPLYING COMPLETE LINKAGE 
+```{r}
+#applying AGNES with complete linkage for clustering
+clustering_H_complete <- agnes(Euclidean_dist, method = "complete")
+```
+
+plotting the clustering with complete linkage method 
+```{r}
+plot(clustering_H_complete, 
+ main = "Ratings AGNES comparision (Complete Linkage)",
+ xlab = "Height",
+ ylab = "Cereal",
+ cex.axis = 0.5,
+ cex = 0.50,
+ hang = -1)
+## Warning in plot.window(xlim, ylim, log = log, ...): "hang" is not a graphical
+## parameter
+
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "hang"
+## is not a graphical parameter
+
+## Warning in axis(1, at = at.vals, labels = lab.vals, ...): "hang" is not a
+## graphical parameter
+
+```
+AVERAGE LINKAGE METHOD
+```{r}
+#applying AGNES with Average linkage method
+clustering_H_average <- agnes(Euclidean_dist, method = "average")
+```
+
+PLOTTING THE AGNES comparison with Average linkage method 
+```{r}
+plot(clustering_H_average, 
+ main = "Ratings, AGNES comparision (Average Linkage)",
+ xlab = "Height",
+ ylab = "cereal",
+ cex.axis = 0.5,
+ cex = 0.50,
+ hang = -1)
+## Warning in plot.window(xlim, ylim, log = log, ...): "hang" is not a graphical
+## parameter
+
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "hang"
+## is not a graphical parameter
+
+## Warning in axis(1, at = at.vals, labels = lab.vals, ...): "hang" is not a
+## graphical parameter
+
+```
+PERFORMING WARD LINKAGE METHOD
+```{r}
+clustering_H_WARD <- agnes(Euclidean_dist, method = "ward")
+
+```
+
+PLOTTING THE RESULTS AFTER USING WARD LINKAGE METHOD 
+```{r}
+plot(clustering_H_WARD, 
+ main = "Ratings, AGNES comparision (Ward Linkage)",
+ xlab = "Height",
+ ylab = "cereal",
+ cex.axis = 0.5,
+ cex = 0.50,
+ hang = -1)
+## Warning in plot.window(xlim, ylim, log = log, ...): "hang" is not a graphical
+## parameter
+
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "hang"
+## is not a graphical parameter
+
+## Warning in axis(1, at = at.vals, labels = lab.vals, ...): "hang" is not a
+## graphical parameter
+
+```
+After applying all the linkage methods with AGNES we found the observations as 
+Single Linkage method: 0.61 Complete Linkage method: 0.84 Average Linkage method: 0.78 
+Ward Method method: 0.90 
+Here we can conclude that, the ward method with highest Agglomerative coefficient will be 
+better suited for this clustering. 
+
+***
+TASK-2 
+
+How many clusters would you choose? 
+Figuring out the optimal of clusters we can make with this data. 
+Applying silhoutte method to figure out the number of optimal clusters. 
+```{r}
+# Calculate the optimal number of clusters for the dataset using the withincluster sum of squares (WCSS) method
+# using the fviz_nbclust() function from the factoextra package
+fviz_nbclust(cleansed_data[ , c(4:16)], hcut, method = "silhouette", k.max =
+30) +
+ labs(title = "Calculating Optimal Number of Clusters using silhouette 
+Method")
+```
+
+Applying Elbow method to figure out the number of optimal clusters. 
+```{r}
+# Determine the optimal number of clusters for the dataset using the Elbow method
+fviz_nbclust(cleansed_data[ , c(4:16)], hcut, method = "wss", k.max = 30) +
+ labs(title = "Calculating Optimal Number of Clusters using Elbow Method") +
+ geom_vline(xintercept = 12, linetype = 2)
+```
+
+Based on both the methods we can conclude that 12 can be the optimal number of clusters for this problem. Therefore, Clustering the data into 12 using Ward linkage method. Plotting the results 
+
+```{r}
+plot(clustering_H_WARD, 
+ main = "Clustering(12) AGNES using Ward linkage",
+ xlab = "Height",
+ ylab = "Cereal",
+ cex.axis = 0.5,
+ cex = 0.50,
+ hang = -1)
+## Warning in plot.window(xlim, ylim, log = log, ...): "hang" is not a graphical
+## parameter
+
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "hang"
+## is not a graphical parameter
+
+## Warning in axis(1, at = at.vals, labels = lab.vals, ...): "hang" is not a
+## graphical parameter
+
+```
+Hence, the cereal data may be optimally grouped into 12 clusters using AGNE's ward linkage approach, with an agglomerative coefficent of about 0.9 for hierarchical clustering. 
+
+***
+TASK - 3 
+
+Comment on the structure of the clusters and on their stability. Hint: To check stability, partition the data and see how well clusters formed based on one part apply to the other part. To do this: ● Cluster partition A ● Use the cluster centroids from A to assign each record in partition B (each record is assigned to the cluster with the closest centroid). ● Assess how consistent the cluster assignments are compared to the assignments based on all the data.
+
+```{r}
+# dividing the tree into 12 clusters
+Clusters_ward_12 <- cutree(clustering_H_WARD, k = 12)
+#Adding the cluster to the cleansed dataset 
+cereal_preprocessed_1 <- cbind(cluster = Clusters_ward_12, cleansed_data)
+```
+Splitting the data and making 70% and 30% partitions to find out the stability of the clusters. 
+```{r}
+# Set the seed for randomized functions
+set.seed(111319)
+# Split the data into 70% partition A and 30% partition B
+cerealIndex <- createDataPartition(cleansed_data$protein, p=0.3, list = F)
+cereal_preprocessed_PartitionB <- cleansed_data[cerealIndex, ]
+cereal_preprocessed_PartitionA <- cleansed_data[-cerealIndex,] 
+
+```
+
+Re-doing the clustering with the partitioned data 
+```{r}
+# calculating the euclidean distances for the partitioned data
+Euclidean_dist_A <- dist(cereal_preprocessed_PartitionA[ ,c(4:16)], method ="euclidean")
+#Euclidean_dist_A
+```
+
+PERFORMING WARD METHOD IN CLUSTERING THE PARTITIONED DATA
+
+```{r}
+#performing AGNES uisng ward linkage method
+Clustering_H_ward_A <- agnes(Euclidean_dist_A, method = "ward")
+plot(Clustering_H_ward_A, 
+ main = " Ward Linkage Method splitted data",
+ xlab = "Cereal",
+ ylab = "Height",
+ cex.axis = 0.5,
+ cex = 0.50,
+ hang = -1)
+## Warning in plot.window(xlim, ylim, log = log, ...): "hang" is not a graphical
+## parameter
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...): "hang"
+## is not a graphical parameter
+
+## Warning in axis(1, at = at.vals, labels = lab.vals, ...): "hang" is not a
+## graphical parameter
+
+```
+Dividing the tree into clusters for Analysis
+```{r}
+Clusters_ward_12_A <- cutree(Clustering_H_ward_A, k = 12)
+```
+
+```{r}
+#clubbing the cluster to the pre-processed dataset 
+cereal_preprocessed_A <- cbind(cluster = Clusters_ward_12_A, 
+cereal_preprocessed_PartitionA)
+cereal_preprocessed_A
+```
+
+Calculating the centroids for figuring out the closest point for all the elemnts in B 
+```{r}
+# Find the centroids for the re-ran Ward hierarchical clustering
+centeroids_A <- aggregate(cereal_preprocessed_A[ , 5:17], 
+list(cereal_preprocessed_A$cluster), mean)
+centeroids_A <- data.frame(Cluster = centeroids_A[ , 1], Centroid =
+rowMeans(centeroids_A[ , -c(1:4)]))
+centeroids_A <- centeroids_A$Centroid
+```
+
+```{r}
+# Calculate Centers of Partition B data set
+cereal_preprocessed_PartitionB_centers <-
+data.frame(cereal_preprocessed_PartitionB[, 1:3], 
+ Center =
+rowMeans(cereal_preprocessed_PartitionB[ , 4:16]))
+```
+
+Calculating the distance between both centers of A and B
+```{r}
+# Calculate the distance between the centers of partition A and the values of partition B
+B_to_A_centers <- dist(centeroids_A, 
+cereal_preprocessed_PartitionB_centers$Center, method = "euclidean")
+# Assign the clusters based on the minimum distance to cluster centers
+cereal_preprocessed_B <- cbind(cluster =
+c(4,8,7,3,5,6,7,11,11,10,8,5,10,1,10,1,4,12,12,7,7,1,4,9), 
+ cereal_preprocessed_PartitionB)
+```
+
+```{r}
+# Combine partitions A and B for comparision to original clusters
+cereal_preprocessed_2 <- rbind(cereal_preprocessed_A, cereal_preprocessed_B)
+cereal_preprocessed_1 <-
+cereal_preprocessed_1[order(cereal_preprocessed_1$name), ]
+cereal_preprocessed_2 <-
+cereal_preprocessed_2[order(cereal_preprocessed_2$name), ]
+
+```
+
+Now that the data has been distributed using both methods (full data and partitioned data), we can compare the number of matching assignments to ascertain the stability of the clusters. 
+```{r}
+sum(cereal_preprocessed_1$cluster == cereal_preprocessed_2$cluster)
+## [1] 33
+```
+This investigation indicates that the clusters are not very stable. When just 70% of the data were available, the assignments for only 33 of the 74 observations were identical. Consequently, the assignment's repeatability is at 44.59%. 
+
+PLOTTING THE HIERARCHIAL CLUSTERING ALGORITHM
+```{r}
+# Visualize the cluster assignments to see any difference between the two
+# Plot of original hierarchical clustering algorithm
+ggplot(data = cereal_preprocessed_1, aes(cereal_preprocessed_1$cluster)) +
+ geom_bar(fill = "BLUE") +
+ labs(title="Cluster Assignments Count on overall Data") +
+ labs(x="Cluster Assignment", y="Count") +
+ guides(fill=FALSE) +
+ scale_x_continuous(breaks=c(1:12)) +
+ scale_y_continuous(breaks=c(5,10,15,20), limits = c(0,25))
+## Warning: The `<scale>` argument of `guides()` cannot be `FALSE`. Use "none" instead as
+## of ggplot2 3.3.4.
+```
+
+```{r}
+# Plot the graph for the partitioned data
+ggplot(data = cereal_preprocessed_2, aes(cereal_preprocessed_2$cluster)) +
+ geom_bar(fill = "BLUE") +
+ labs(title="Cluster Assignments Count on partitioned Data") +
+ labs(x="Cluster Assignment", y="Count") +
+ guides(fill=FALSE) +
+ scale_x_continuous(breaks=c(1:12)) +
+ scale_y_continuous(breaks=c(5,10,15,20), limits = c(0,25))
+
+```
+Visually, it is evident that once the data was divided, Cluster 3 shrank significantly. As a result, the size of some of the other clusters increased. The graphic suggests that when the data is partitioned, the clusters are distributed more equally among the 12 clusters. 
+
+***
+TASK - 4 
+The elementary public schools would like to choose a set of cereals to include in their daily 
+cafeterias. Every day a different cereal is offered, but all cereals should support a healthy 
+diet. For this goal, you are requested to find a cluster of “healthy cereals.” Should the data 
+be normalized? If not, how should they be used in the cluster analysis?
+
+
+In this case, normalising the data wouldn't be appropriate. It would not be appropriate since the nutritional information for cereal must be scaled or normalised based on the cereal sample that is being assessed. Because of this, the dataset that was gathered could only include cereals with a very high sugar content and minimal amounts of fibre, iron, or other nutrients. It is difficult to forecast how much nutrition a child will receive from cereal after it has been scaled or standardised throughout the sample set. A cereal with an iron content of 0.999 can lead an uninformed observer to believe that it provides almost all of the nutritive iron a kid needs, but it might also be the worst cereal in the sample set, having very little nutritious value.
+
+Therefore, a more appropriate method to preprocess the data would be to make it a ratio to the daily needed quantities of calories, fibre, carbohydrates, etc. for a youngster. This would allow analysts to make better conclusions about the clusters during evaluation by preventing a small number of important elements from overriding the distance calculations. When analysing the clusters, an analyst may determine how much of a student's required daily intake of nutrients would come from XX cereal by looking at the cluster average. After that, the employees would have the information to select from a range of “healthy” cereal clusters. 
+
+thus, As the measurements for various nutrients may be on different scales, it is advised to normalise the data before doing a cluster analysis.Normalisation will guarantee that the weight of every nutrient in the analysis is the same. One method for identifying a cluster of “healthy cereals” would be to select a cluster of cereals with low ratings for nutrients like sugar and salt and high ratings for nutrients like fibre, protein, and vitamins. When choosing cereals for the cafeteria, store displays and customer reviews could also be helpful factors to take into account. After the data has been normalised, you may use the chosen technique (Agnes with complete linkage, for example) to do hierarchical clustering. After then, you may look at the clusters that are formed to find a collection of grains that match By dividing the data into two parts and evaluating how well the clusters created based on one part apply to the other, you may further assess the stability of the clusters.
